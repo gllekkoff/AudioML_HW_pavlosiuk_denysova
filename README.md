@@ -59,7 +59,7 @@ Lower is better. PER of 15% means roughly 85% of phonemes are correct.
 
 ### 3. Metrics
 
-**Last layer (layer 12) results:**c
+**Last layer (layer 12) results:**
 
 | Model | PER |
 |---|---|
