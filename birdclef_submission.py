@@ -213,5 +213,5 @@ assert submission.columns.tolist() == ["row_id"] + class_labels
 assert not submission.isna().any().any()
 
 submission.to_csv(OUT_PATH, index=False)
-print(f"\nSaved → {OUT_PATH}  shape={submission.shape}")
+print(f"\nSaved -> {OUT_PATH}  shape={submission.shape}")
 print(submission.iloc[:3, :8])
