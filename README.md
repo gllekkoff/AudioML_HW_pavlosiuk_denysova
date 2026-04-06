@@ -4,16 +4,6 @@
 [Roman Pavlosiuk](https://github.com/gllekkoff)\
 [Iryna Denysova](https://github.com/Shnapa)
 
-## BirdCLEF solution alaysis
+Everything described in [our ipynb file](hw2_birdclef.ipynb)
 
-## EDA
-
-## Validation
-
-## Metrics
-
-## Models comparison
-
-## Kaggle Leaderboard
-
-## Validation vs. Kaggle Leaderboard corellation
+Submission is here: [birdclef_submission](birdclef_submission.py)
