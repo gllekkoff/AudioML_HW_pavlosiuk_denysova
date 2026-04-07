@@ -12,9 +12,6 @@ import joblib
 
 warnings.filterwarnings("ignore")
 
-np.random.seed(1337)
-torch.manual_seed(1337)
-
 DATA_DIR   = Path("/kaggle/input/competitions/birdclef-2026")
 MODELS_DIR = Path("/kaggle/input/datasets/gllekk/birdceaf-models")
 OUT_PATH   = Path("/kaggle/working/submission.csv")
@@ -35,7 +32,8 @@ BATCH_SIZE = 64
 
 print(f"Using device: {DEVICE}")
 
-class_labels = pd.read_csv(DATA_DIR / "taxonomy.csv")["primary_label"].tolist()
+sample_sub   = pd.read_csv(DATA_DIR / "sample_submission.csv")
+class_labels = [c for c in sample_sub.columns if c != "row_id"]
 n_classes    = len(class_labels)
 print(f"Classes: {n_classes}")
 
@@ -154,6 +152,11 @@ def build_efficientnet(n_cls: int) -> nn.Module:
     return model
 
 
+_fallback = sample_sub.copy()
+_fallback.iloc[:, 1:] = 0.0
+_fallback.to_csv(OUT_PATH, index=False)
+print("Fallback submission written.")
+
 lr_pipeline = joblib.load(MODELS_DIR / "lr_pipeline.pkl")
 print("Loaded LR pipeline.")
 
@@ -167,51 +170,60 @@ effnet_model.load_state_dict(torch.load(MODELS_DIR / "effnet_model.pt", map_loca
 effnet_model.eval()
 print("Loaded EfficientNet-B0.")
 
-test_soundscape_path = DATA_DIR / "test_soundscapes"
-test_soundscapes = sorted(
-    str(test_soundscape_path / f)
-    for f in os.listdir(test_soundscape_path)
-    if f.endswith(".ogg")
-)
-print(f"Test soundscapes found: {len(test_soundscapes)}")
+def run_inference() -> pd.DataFrame:
+    expected_row_ids = sample_sub["row_id"].tolist()
+    row_id_to_idx    = {rid: i for i, rid in enumerate(expected_row_ids)}
+    probs            = np.zeros((len(expected_row_ids), n_classes), dtype=np.float32)
 
-row_ids     = []
-scores_list = []
+    test_soundscape_path = DATA_DIR / "test_soundscapes"
+    test_soundscapes = sorted(
+        str(test_soundscape_path / f)
+        for f in (os.listdir(test_soundscape_path) if test_soundscape_path.exists() else [])
+        if f.endswith(".ogg")
+    )
+    print(f"Test soundscapes found: {len(test_soundscapes)}")
 
-for soundscape in test_soundscapes:
-    try:
-        wav      = load_audio_as_tensor(soundscape)
-        chunks_t = chunkify(wav)
-        stem     = Path(soundscape).stem
+    for soundscape in test_soundscapes:
+        try:
+            wav      = load_audio_as_tensor(soundscape)
+            chunks_t = chunkify(wav)
+            stem     = Path(soundscape).stem
 
-        mel_batch  = batch_mel_specs(chunks_t)
-        feats_mfcc = batch_mfcc_features(chunks_t)
+            mel_batch  = batch_mel_specs(chunks_t)
+            feats_mfcc = batch_mfcc_features(chunks_t)
 
-        preds_lr  = lr_pipeline.predict_proba(feats_mfcc).astype(np.float32)
-        preds_cnn = predict_nn(cnn_model,    mel_batch)
-        preds_eff = predict_nn(effnet_model, mel_batch)
+            preds_lr  = lr_pipeline.predict_proba(feats_mfcc).astype(np.float32)
+            preds_cnn = predict_nn(cnn_model,    mel_batch)
+            preds_eff = predict_nn(effnet_model, mel_batch)
 
-        preds_ens = W_LR * preds_lr + W_CNN * preds_cnn + W_EFFNET * preds_eff
+            preds_ens = W_LR * preds_lr + W_CNN * preds_cnn + W_EFFNET * preds_eff
 
-        n = chunks_t.shape[0]
-        row_ids.extend(f"{stem}_{(i + 1) * DURATION}" for i in range(n))
-        scores_list.append(preds_ens)
+            n = chunks_t.shape[0]
+            for i in range(n):
+                rid = f"{stem}_{i * DURATION + DURATION}"
+                if rid in row_id_to_idx:
+                    probs[row_id_to_idx[rid]] = preds_ens[i]
 
-        print(f"{stem} — {n} chunks done.")
+            print(f"{stem} — {n} chunks done.")
 
-    except Exception as e:
-        import traceback
-        print(f"ERROR on {soundscape}: {e}")
-        traceback.print_exc()
+        except Exception as e:
+            import traceback
+            print(f"ERROR on {soundscape}: {e}")
+            traceback.print_exc()
 
-probs = np.concatenate(scores_list, axis=0).astype(np.float32)
+    result = pd.DataFrame(probs, columns=class_labels)
+    result.insert(0, "row_id", expected_row_ids)
+    return result
 
-submission = pd.DataFrame(probs, columns=class_labels)
-submission.insert(0, "row_id", row_ids)
 
-assert submission.columns.tolist() == ["row_id"] + class_labels
-assert not submission.isna().any().any()
+predictions = run_inference()
 
-submission.to_csv(OUT_PATH, index=False)
-print(f"\nSaved -> {OUT_PATH}  shape={submission.shape}")
-print(submission.iloc[:3, :8])
+assert list(predictions.columns) == list(sample_sub.columns), \
+    f"Column mismatch!\nExpected: {list(sample_sub.columns)[:5]}\nGot: {list(predictions.columns)[:5]}"
+assert len(predictions) == len(sample_sub), \
+    f"Row count mismatch! Expected {len(sample_sub)}, got {len(predictions)}"
+assert not predictions.isna().any().any(), "NaN values found in submission!"
+
+predictions.to_csv(OUT_PATH, index=False)
+print(f"\nSaved -> {OUT_PATH}  shape={predictions.shape}")
+print(predictions.iloc[:3, :8])
