@@ -20,8 +20,6 @@ This task is complex because it combines:
 - Speech recognition (audio → text)
 - Machine translation (text → another language)
 
----
-
 ## Dataset
 
 We use the Google FLEURS dataset, which provides:
@@ -45,15 +43,11 @@ The dataset is very small:
 
 This strongly limits model performance.
 
----
-
 ## Dataset Split
 
 ![Dataset Split](./images/trainsplit.png)
 
 The split is correct, but total data is too small for effective training.
-
----
 
 ## Dataloader
 
@@ -61,8 +55,6 @@ The split is correct, but total data is too small for effective training.
 
 - Pipeline works correctly  
 - But number of batches is small, so learning is limited  
-
----
 
 ## Audio Representation
 
@@ -75,8 +67,6 @@ The split is correct, but total data is too small for effective training.
 Audio is converted into features before model processing.  
 This part works correctly and does not cause issues.
 
----
-
 ## Model
 
 We use the pretrained Whisper model:
@@ -84,8 +74,6 @@ We use the pretrained Whisper model:
 - multilingual support  
 
 The model is large, but the dataset is small, so adaptation is weak.
-
----
 
 ## Training Process
 
@@ -101,8 +89,6 @@ This indicates:
 
 The pipeline runs, but real learning is minimal.
 
----
-
 ## Baseline Predictions
 
 ![Baseline Predictions](./baseline.png)
@@ -111,8 +97,6 @@ Predictions before training (zero-shot).
 - outputs are often incorrect or meaningless  
 - model is not adapted to this dataset  
 
----
-
 ## Evaluation (COMET)
 
 ![COMET Results](./ast_comet.png)
@@ -120,15 +104,11 @@ Predictions before training (zero-shot).
 - small improvement after training  
 - model learned slightly, but not enough  
 
----
-
 ![Evaluation Table](./result.png)
 
 - evaluation is correct (60 samples)  
 - improvement is confirmed  
 - results are still weak  
-
----
 
 ## Sample Predictions
 
@@ -184,8 +164,6 @@ However:
 - training is limited  
 - improvement is small  
 - predictions are mostly incorrect  
-
----
 
 ## Key Takeaway
 The pipeline works correctly, but due to the very small dataset and limited training process, the model could not significantly improve translation quality.
