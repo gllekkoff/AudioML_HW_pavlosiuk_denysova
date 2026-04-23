@@ -7,9 +7,9 @@ This is main branch for Audio ML course Homeworks, it will be just clean with re
 
 ## Homework 1: Phoneme Recognition + Audio Filters
 
-# Automatic Speech Translation (AST) with Whisper
+## Automatic Speech Translation (AST) with Whisper
 
-## Overview
+### Overview
 
 This project implements a system for Automatic Speech Translation (AST).
 
@@ -20,7 +20,7 @@ This task is complex because it combines:
 - Speech recognition (audio → text)
 - Machine translation (text → another language)
 
-## Dataset
+### Dataset
 
 We use the Google FLEURS dataset, which provides:
 - audio samples
@@ -29,13 +29,13 @@ We use the Google FLEURS dataset, which provides:
 
 ![Dataset Info](./images/datainfo.png)
 
-### What this shows
+#### What this shows
 Each sample contains:
 - `audio` — input speech  
 - `transcription` — original English text  
 - `translation` — Ukrainian translation  
 
-### Important
+#### Important
 The dataset is very small:
 - ~130 training samples  
 - ~60 validation samples  
@@ -43,13 +43,13 @@ The dataset is very small:
 
 This strongly limits model performance.
 
-## Dataset Split
+### Dataset Split
 
 ![Dataset Split](./images/trainsplit.png)
 
 The split is correct, but total data is too small for effective training.
 
-## Dataloader
+### Dataloader
 
 ![Dataloader](./images/dataload.png)
 
@@ -60,14 +60,14 @@ The split is correct, but total data is too small for effective training.
 
 ![Audio Example](./images/audioex.png)
 
-### What this shows
+#### What this shows
 - Waveform (signal over time)  
 - Frequency spectrum  
 
 Audio is converted into features before model processing.  
 This part works correctly and does not cause issues.
 
-## Model
+### Model
 
 We use the pretrained Whisper model:
 - ~37.8M parameters  
@@ -75,11 +75,11 @@ We use the pretrained Whisper model:
 
 The model is large, but the dataset is small, so adaptation is weak.
 
-## Training Process
+### Training Process
 
 ![Training Logs](./images/train.png)
 
-### Critical observation
+#### Critical observation
 Training: 0/?
 Validation: 0/?
 
@@ -89,7 +89,7 @@ This indicates:
 
 The pipeline runs, but real learning is minimal.
 
-## Baseline Predictions
+### Baseline Predictions
 
 ![Baseline Predictions](./images/baseline.png)
 
@@ -97,7 +97,7 @@ Predictions before training (zero-shot).
 - outputs are often incorrect or meaningless  
 - model is not adapted to this dataset  
 
-## Evaluation (COMET)
+### Evaluation (COMET)
 
 ![COMET Results](./images/ast_comet.png)
 
@@ -110,7 +110,7 @@ Predictions before training (zero-shot).
 - improvement is confirmed  
 - results are still weak  
 
-## Sample Predictions
+### Sample Predictions
 
 ![Predictions](./images/text.png)
 
@@ -129,30 +129,30 @@ The model failed to learn proper translation.
 
 ---
 
-## Why Results Are Weak
+### Why Results Are Weak
 
-### 1. Small dataset
+#### 1. Small dataset
 - only ~130 training samples  
 - not enough for deep learning  
 
-### 2. Few training epochs
+#### 2. Few training epochs
 - only 3 epochs  
 - insufficient training time  
 
-### 3. Large model vs small data
+#### 3. Large model vs small data
 - 37M parameters  
 - cannot generalize from small dataset  
 
-### 4. Training inefficiency
+#### 4. Training inefficiency
 - logs show weak iteration (`0/?`)  
 
-### 5. Task complexity
+#### 5. Task complexity
 - AST combines speech recognition and translation  
 - harder than single-task problems  
 
 ---
 
-## Conclusion
+### Conclusion
 
 The project successfully builds a full AST pipeline:
 - data loading  
@@ -165,5 +165,5 @@ However:
 - improvement is small  
 - predictions are mostly incorrect  
 
-## Key Takeaway
+### Key Takeaway
 The pipeline works correctly, but due to the very small dataset and limited training process, the model could not significantly improve translation quality.
