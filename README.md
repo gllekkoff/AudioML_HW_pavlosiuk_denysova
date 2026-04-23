@@ -32,7 +32,7 @@ The remaining speakers are split 90/10 into train and validation sets.
 
 ### Exploratory Data Analysis
 
-![EDA Overview](assets/eda_overview.png)
+![EDA Overview](images/eda_overview.png)
 
 The dataset contains approximately 29,000 valid samples after filtering out missing files and empty transcripts. The train/test split is heavily skewed toward training, which is expected given only 21 test folders out of the full set.
 
@@ -44,19 +44,19 @@ The folder imbalance plot reveals uneven speaker representation, with some speak
 
 ### Sample Audio
 
-![Waveform and Spectrogram](assets/eda_waveform.png)
+![Waveform and Spectrogram](images/eda_waveform.png)
 
 A representative sample waveform and spectrogram are shown above. The spectrogram shows clear speech formant structure across the frequency range, indicating good recording quality with minimal background noise.
 
 ### Duration vs. Transcript Length
 
-![Duration vs Words](assets/eda_duration_vs_words.png)
+![Duration vs Words](images/eda_duration_vs_words.png)
 
 The correlation between audio duration and word count gives an idea of how consistent the speaking rate is across the dataset. A Pearson r close to 1 would indicate clean, consistent speech. Lower values suggest variability in speaking speed or some misalignment between audio and transcript.
 
 ### Token Length Analysis
 
-![Token Lengths](assets/eda_token_lengths.png)
+![Token Lengths](images/eda_token_lengths.png)
 
 A key optimization was deriving `MAX_NEW_TOKENS` directly from the data rather than using Whisper's default of 448. Ukrainian Cyrillic text averages **3.26 tokens per word** with Whisper's BPE tokenizer - significantly higher than Latin-script languages because the tokenizer was trained predominantly on Latin text and splits Cyrillic words into more subword pieces.
 
