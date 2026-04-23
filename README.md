@@ -91,7 +91,7 @@ The pipeline runs, but real learning is minimal.
 
 ## Baseline Predictions
 
-![Baseline Predictions](./baseline.png)
+![Baseline Predictions](./images/baseline.png)
 
 Predictions before training (zero-shot).
 - outputs are often incorrect or meaningless  
@@ -99,12 +99,12 @@ Predictions before training (zero-shot).
 
 ## Evaluation (COMET)
 
-![COMET Results](./ast_comet.png)
+![COMET Results](./images/ast_comet.png)
 
 - small improvement after training  
 - model learned slightly, but not enough  
 
-![Evaluation Table](./result.png)
+![Evaluation Table](./images/result.png)
 
 - evaluation is correct (60 samples)  
 - improvement is confirmed  
@@ -112,7 +112,7 @@ Predictions before training (zero-shot).
 
 ## Sample Predictions
 
-![Predictions](./text.png)
+![Predictions](./images/text.png)
 
 - `src` — English input  
 - `ref` — correct Ukrainian translation  
