@@ -11,9 +11,9 @@ The goal of this work is to build a Ukrainian speech recognition system by fine-
 
 ## Model Choice
 
-We use **`openai/whisper-base`** - a 74M parameter multilingual encoder-decoder transformer pretrained by OpenAI on 680,000 hours of multilingual speech. Whisper was chosen because it natively supports Ukrainian and comes with a strong multilingual acoustic understanding out of the box, meaning fine-tuning can focus on adapting to the specific speaker and recording conditions of this dataset rather than learning Ukrainian from scratch.
+We use **`openai/whisper-small`** - a 244M parameter multilingual encoder-decoder transformer pretrained by OpenAI on 680,000 hours of multilingual speech. Whisper was chosen because it natively supports Ukrainian and comes with a strong multilingual acoustic understanding out of the box, meaning fine-tuning can focus on adapting to the specific speaker and recording conditions of this dataset rather than learning Ukrainian from scratch.
 
-`whisper-base` was preferred over `whisper-small` (244M parameters) due to the 8 GB VRAM constraint of the training hardware (NVIDIA RTX 4060). The base model comfortably fits with a batch size of 8, leaving enough headroom for mixed-precision training and gradient accumulation.
+`whisper-small` was used instead of training a model from scratch because it provides stronger multilingual speech representations while still fitting within the 8 GB VRAM constraint of the training hardware (NVIDIA RTX 4060). To make it fit reliably, we used a small per-device batch size together with mixed-precision training and gradient accumulation.
 
 ---
 
@@ -72,10 +72,10 @@ Training is implemented using **PyTorch Lightning**, which handles the training 
 
 | Parameter | Value |
 |-----------|-------|
-| Model | `openai/whisper-base` |
+| Model | `openai/whisper-small` |
 | Precision | `bf16-mixed` |
-| Batch size | 8 |
-| Gradient accumulation | 4 (effective batch = 32) |
+| Batch size | 2 |
+| Gradient accumulation | 16 (effective batch = 32) |
 | Learning rate | 1e-5 |
 | LR schedule | Linear warmup (10%) + linear decay |
 | Weight decay | 0.1 |
