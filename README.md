@@ -140,3 +140,66 @@ The KV cache is what makes this fast — without it, every step would re-process
 - Gradient checkpointing + bf16 kept memory usage well within the 8GB VRAM of the RTX 4060
 
 Checkpoint saved to `artifacts/checkpoints/gpt2tts_last_state_dict.pt`. It contains the model state dict, config, codec name, tokenizer name, and sample rate.
+
+---
+
+## Inference and evaluation
+
+The inference and metrics part is implemented in `hw4_inference_metrics.ipynb`. This notebook is separate from training on purpose: it restores the already trained checkpoint, generates audio for a fixed validation subset, and computes objective metrics for comparing decoding strategies.
+
+Use the Python 3.10 evaluation environment for reproducible metric runs:
+
+```bash
+python3.10 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-eval.txt
+python -m ipykernel install --user --name audioml-eval-py310 --display-name "AudioML Eval (Python 3.10)"
+```
+
+Select the `AudioML Eval (Python 3.10)` kernel in Jupyter/VS Code before running the notebook.
+
+### Inference notebook flow
+
+1. Load the trained `GPT2TTS` checkpoint from `artifacts/checkpoints/gpt2tts_last_state_dict.pt`.
+2. Load the same GPT2 tokenizer and FocalCodec used during training.
+3. Rebuild the LJ Speech validation split with the fixed seed and select 50 validation utterances.
+4. Generate audio for each text with four decoding strategies:
+
+| Method | temperature | top_k | top_p | sampling |
+|---|---:|---:|---:|---|
+| `greedy` | 1.0 | 0 | 1.0 | no |
+| `temperature` | 0.8 | 0 | 1.0 | yes |
+| `top_k` | 1.0 | 50 | 1.0 | yes |
+| `top_p` | 1.0 | 0 | 0.9 | yes |
+
+Generated wav files are saved under:
+
+```text
+artifacts/inference_outputs/<method>/<lj_id>.wav
+```
+
+The notebook also writes `artifacts/inference_outputs/results_index.csv`, which maps every generated file to its LJ Speech id, reference text, reference wav, decoding method, and generated token count.
+
+### Metrics
+
+The notebook computes three metrics:
+
+- **CER**: Whisper ASR transcribes each generated wav, then `jiwer.cer` compares the transcript against the reference text. Lower is better.
+- **UTMOSv2**: no-reference speech quality / naturalness estimate on a MOS-like scale. Higher is better. We use `UTMOSv2` instead of the older `utmos` package because it avoids the fragile `fairseq` dependency.
+- **SECS**: speaker embedding cosine similarity between each generated wav and the matching LJ Speech reference wav, using SpeechBrain ECAPA-TDNN. Higher means the generated voice is closer to the LJ Speech speaker identity.
+
+Per-metric files are written to:
+
+```text
+artifacts/inference_outputs/cer_results.csv
+artifacts/inference_outputs/utmos_results.csv
+artifacts/inference_outputs/secs_results.csv
+```
+
+The final comparison table is saved as:
+
+```text
+artifacts/inference_outputs/metrics_summary.csv
+```
+
+This summary groups results by decoding method and reports mean, median, and standard deviation for CER, UTMOSv2, and SECS. It is the table used to compare sampling strategies in the report.

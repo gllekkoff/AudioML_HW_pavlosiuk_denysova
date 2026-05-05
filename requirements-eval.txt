@@ -1,0 +1,23 @@
+numpy
+pandas
+tqdm
+certifi
+ipykernel
+
+torch
+torchaudio
+
+transformers
+soundfile
+librosa
+
+openai-whisper
+jiwer
+speechbrain
+utmosv2 @ git+https://github.com/sarulab-speech/UTMOSv2.git
+
+huggingface-hub
+safetensors
+torchcodec
+
+focalcodec@git+https://github.com/lucadellalib/focalcodec.git@main
